@@ -1,25 +1,30 @@
 package com.sunnyweather.android.ui.weather
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.sunnyweather.android.R
 import com.sunnyweather.android.databinding.ActivityWeatherBinding
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.logic.model.getSky
+import com.sunnyweather.android.ui.place.PlaceFragment
 import java.text.SimpleDateFormat
 import java.util.*
 
 class WeatherActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityWeatherBinding
+    lateinit var binding: ActivityWeatherBinding
 
     val viewModel by lazy { ViewModelProvider(this).get(WeatherViewModel::class.java) }
 
@@ -52,10 +57,47 @@ class WeatherActivity : AppCompatActivity() {
                 Toast.makeText(this, "无法成功获取天气信息", Toast.LENGTH_LONG).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.swipeRefresh.isRefreshing = false
         })
 
-        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        binding.swipeRefresh.setColorSchemeResources(R.color.colorPrimary)
+        refreshWeather()
+        binding.swipeRefresh.setOnRefreshListener {
+            refreshWeather()
+        }
 
+        // 在切换城市按钮的点击事件中调用DrawerLayout的openDrawer()方法来打开滑动菜单
+        binding.includeNow.navBtn.setOnClickListener {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        // 监听菜单的打开，主要用于菜单关闭时要隐藏输入法
+        binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                manager.hideSoftInputFromWindow(
+                    binding.drawerLayout.windowToken,
+                    InputMethodManager.HIDE_NOT_ALWAYS
+                )
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+            }
+
+        })
+
+//        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+    }
+
+    fun refreshWeather() {
+        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        binding.swipeRefresh.isRefreshing = true
     }
 
     private fun showWeatherInfo(weather: Weather) {

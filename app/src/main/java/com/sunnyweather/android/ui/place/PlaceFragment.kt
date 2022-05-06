@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.sunnyweather.android.MainActivity
 import com.sunnyweather.android.databinding.FragmentPlaceBinding
 import com.sunnyweather.android.ui.weather.WeatherActivity
 
@@ -22,7 +23,7 @@ class PlaceFragment : Fragment() {
     // 使用lazy函数这种懒加载技术来获取PlaceViewModel的实例
     val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
 
-    private lateinit var binding: FragmentPlaceBinding
+    lateinit var binding: FragmentPlaceBinding
 
     private lateinit var adapter: PlaceAdapter
 
@@ -48,7 +49,7 @@ class PlaceFragment : Fragment() {
                 // 替代onActivityCreated()，因为onActivityCreated()被废弃了
                 if (event.targetState == Lifecycle.State.CREATED) {
                     // 如果当前已经有存储了选择的城市数据，那么就直接获取存储的城市数据并跳转到天气界面
-                    if (viewModel.isPlaceSaved()) {
+                    if (activity is MainActivity && viewModel.isPlaceSaved()) {
                         val place = viewModel.getSavedPlace()
                         val intent = Intent(context, WeatherActivity::class.java).apply {
                             putExtra("location_lng", place.location.lng)
