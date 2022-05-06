@@ -9,7 +9,7 @@ class SunnyWeatherApplication : Application() {
         @SuppressLint("StaticFieldLeak")
         lateinit var context: Context
 
-        const val TOKEN = "这里到时候填写彩云科技API注册的Token"
+        const val TOKEN = "qaaUx64CdoXm3fPJ"
     }
 
     override fun onCreate() {

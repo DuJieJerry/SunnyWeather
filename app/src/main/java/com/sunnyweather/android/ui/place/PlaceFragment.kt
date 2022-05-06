@@ -1,6 +1,7 @@
 package com.sunnyweather.android.ui.place
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sunnyweather.android.databinding.FragmentPlaceBinding
+import com.sunnyweather.android.ui.weather.WeatherActivity
 
 class PlaceFragment : Fragment() {
     // 使用lazy函数这种懒加载技术来获取PlaceViewModel的实例
@@ -45,6 +47,18 @@ class PlaceFragment : Fragment() {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                 // 替代onActivityCreated()，因为onActivityCreated()被废弃了
                 if (event.targetState == Lifecycle.State.CREATED) {
+                    // 如果当前已经有存储了选择的城市数据，那么就直接获取存储的城市数据并跳转到天气界面
+                    if (viewModel.isPlaceSaved()) {
+                        val place = viewModel.getSavedPlace()
+                        val intent = Intent(context, WeatherActivity::class.java).apply {
+                            putExtra("location_lng", place.location.lng)
+                            putExtra("location_lat", place.location.lat)
+                            putExtra("place_name", place.name)
+                        }
+                        startActivity(intent)
+                        activity?.finish()
+                        return
+                    }
                     // 这里就是原来替代onActivityCreated里的逻辑
                     val layoutManager = LinearLayoutManager(activity)
                     binding.recyclerView.layoutManager = layoutManager
